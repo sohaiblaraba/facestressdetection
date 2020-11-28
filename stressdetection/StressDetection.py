@@ -41,6 +41,7 @@ draw_landmarks 	 		= True
 draw_corners 	 		= True
 display_fps             = True
 
+show_forehead           = True
 forehead_offset 	 	= 40
 forehead_width 	 		= 200
 forehead_height 	 	= 60
@@ -96,34 +97,39 @@ class VideCapture:
 
 class Stress:
 	def __init__(self):
-		self.detector 	 	  = dlib.get_frontal_face_detector()
-		self.predictor 	 	  = dlib.shape_predictor(dlib_keypoints_path)
-		self.forehead         = None
-		self.data_buffer	  = []
-		self.times			= []
-		self.fft			  = []
-		self.buffer_size	  = 250
-		self.hri			  = 0
-		self.wait			 = 0
-		self.idx			  = 1
-		self.t0			   = time.time()
-		self.fps			  = 0
-		self.stress		   = 0
-		self.frame_resize	 = (320, 216)	 # Resizing the input image to speed up the processing
-		self.screen_width	 = pyautogui.size()[0] # Width of the screen
-		self.screen_height	= pyautogui.size()[1] # Height of the screen
+		self.detector = dlib.get_frontal_face_detector()
+		self.predictor = dlib.shape_predictor(dlib_keypoints_path)
+		self.forehead = None
+		self.data_buffer = []
+		self.times = []
+		self.fft = []
+		self.buffer_size = 250
+		self.hri = 0
+		self.wait = 0
+		self.t0 = time.time()
+		self.fps = 0
+		self.stress = 0
+		self.frame_resize = (320, 216)	 # Resizing the input image to speed up the processing
+		self.screen_width = pyautogui.size()[0] # Width of the screen
+		self.screen_height = pyautogui.size()[1] # Height of the screen
 		self.resize_factor_width = int(self.screen_width / self.frame_resize[0])
 		self.resize_factor_height = int(self.screen_height / self.frame_resize[1])
 
+		self.disp_forehead = show_forehead
+		self.disp_forehead_outline = forehead_outline
+		self.disp_fps = display_fps
+		self.disp_landmarks = draw_landmarks
+		self.disp_rectangle = draw_bbx
+
+
 	def init(self):
-		self.data_buffer	  = []
-		self.times			= []
-		self.fft			  = []
-		self.hri			  = 0
-		self.wait			 = 0
-		self.idx			  = 1
-		self.t0			   = time.time()
-		self.stress		   = 0
+		self.data_buffer = []
+		self.times = []
+		self.fft = []
+		self.hri = 0
+		self.wait = 0
+		self.t0 = time.time()
+		self.stress = 0
 
 	def set_screen_size(width, Height):
 		self.screen_width = width
@@ -157,6 +163,22 @@ class Stress:
 					   p8c[1]*self.resize_factor_height+forehead_offset+forehead_height)
 		forehead = image[forehead_p1[1]:forehead_p2[1], forehead_p1[0]:forehead_p2[0]]
 		return forehead, forehead_p1, forehead_p2
+
+	def display_forehead(self, display):
+		self.disp_forehead = display
+
+	def display_forehead_outline(self, display):
+		self.disp_forehead_outline = display
+
+	def display_fps(self, display):
+		self.disp_fps = display
+
+	def display_landmarks(self, display):
+		self.disp_landmarks = display
+
+	def display_rectangle(self, display):
+		self.disp_rectangle = display
+
 
 	def get_means(self, image):
 		return (np.mean(image[:, :, 0]) + np.mean(image[:, :, 1]) + np.mean(image[:, :, 2])) / 3.
@@ -246,8 +268,9 @@ class Stress:
 				landmarks = self.get_landmarks(cap.gray, rect)
 
 				self.forehead, forehead_p1, forehead_p2 = self.get_forehead(cap.frame, landmarks)
-				cap.disp[forehead_p1[1]:forehead_p2[1], forehead_p1[0]:forehead_p2[0]] = self.forehead
-				if forehead_outline:
+				if self.disp_forehead:
+					cap.disp[forehead_p1[1]:forehead_p2[1], forehead_p1[0]:forehead_p2[0]] = self.forehead
+				if self.disp_forehead_outline:
 					cv2.rectangle(cap.disp, forehead_p1, forehead_p2, forehead_outline_color, forehead_outline_thik)
 
 				# Drawing the rectangle on the face
@@ -255,10 +278,10 @@ class Stress:
 									rect.top()*self.resize_factor_height, 
 									rect.right()*self.resize_factor_width,
 									rect.bottom()*self.resize_factor_height)
-				if draw_bbx:
+				if self.disp_rectangle:
 					self.draw_rectangle(cap.disp, (x1, y1), (x2, y2), color=bbx_color, thikness=1, corners=60)
 
-				if draw_landmarks:
+				if self.disp_landmarks:
 					self.draw_landmarks(cap.disp, landmarks)
 
 				if self.forehead is not None:
@@ -295,7 +318,7 @@ class Stress:
 													 position=(text_left_margin, text_upper_margin+space_text_line_upper+space_text_line_lower), 
 													 font=font_bold, color=font_color)
 
-					if display_fps and self.fps is not None:
+					if self.disp_fps and self.fps is not None:
 						fps_txt = "{:.2f}fps".format(self.fps)
 						cap.disp = self.add_text_custom_font(cap.disp, fps_txt, position=(40, self.screen_height-40), font=font, color=font_color)
 
