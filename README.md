@@ -1,7 +1,7 @@
 # Stress detection system based on face cues
 
 Details to be added soon
-
+![example](https://github.com/sohaib-l/facestressdetection/blob/main/examples/outputdisplay.JPG)
 
 ## Requirements
 * dlib
@@ -42,3 +42,4 @@ $ python run.py --input 0 --rectangle --landmarks --forehead --forehead_outline 
 * --fps: to show the framerate on the bottom left of the screen. (default: False)
 
 * Press 'q' on the keyboard to quit the program.
+
