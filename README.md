@@ -31,7 +31,14 @@ $ python run.py --input video.mp4
 ```
 
 ### Using the webcam
-Specify the id of the webcam. Generally 0 for the integrated webcam.
 ```
-$ python run.py --input 0
+$ python run.py --input 0 --rectangle --landmarks --forehead --forehead_outline --fps
 ```
+* --input 0: specify the input. if input is an integer => webcam. If input is a string => a video path
+* --rectangle: to display the rectangle around the detected face. (default: False)
+* --landmarks: to display the landmarks of the detected face. (default: False)
+* --forehead: to display a color rectangle on the forehead. (defalut: False)
+* --forehead_outline: to display the outline around the forehead. (default: False)
+* --fps: to show the framerate on the bottom left of the screen. (default: False)
+
+* Press 'q' on the keyboard to quit the program.
